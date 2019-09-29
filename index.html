@@ -1,0 +1,46 @@
+<h3>Guessing game</h3>
+<div id="message" style="width: fit-content"></div>
+<input type="number" id="number" />
+<button id="guessButton">Guess</button>
+<div id="history">Your last guess:</div>
+
+<script>
+  const button = document.getElementById("guessButton");
+  const guessingNumber = Math.floor(Math.random() * 11);
+  let history = [];
+  button.addEventListener("click", function() {
+    const userGuess = document.getElementById("number").value;
+    let message = document.getElementById("message");
+    history.push(userGuess);
+
+    var historyGuess = "Your last guess: <br>";
+    for (var i = 0; i < history.length; i++) {
+      historyGuess += history[i] + "<br>";
+    }
+    document.getElementById("history").innerHTML = historyGuess;
+
+    var count = 10 - history.length;
+
+    if (count === 0) {
+      button.disabled = true;
+    }
+
+    if (userGuess > guessingNumber) {
+      message.innerHTML =
+        "Your guess was too high, guess lower. You have " +
+        count +
+        " guesses left";
+      message.style.backgroundColor = "red";
+    } else if (userGuess < guessingNumber) {
+      message.innerHTML =
+        "Your guess was too low, guess higher. You have " +
+        count +
+        " guesses left";
+      message.style.backgroundColor = "red";
+    } else {
+      message.innerHTML = "Yay YOU ARE THE LORD OF THE GUESSES";
+      message.style.backgroundColor = "green";
+      button.disabled = true;
+    }
+  });
+</script>
