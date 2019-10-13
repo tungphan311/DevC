@@ -17,6 +17,9 @@ export default function App () {
   const [userChoice, setUserChoice] = useState({});
   const [comChoice, setComChoice] = useState({});
   const [showModal, toggleShowModal] = useState(false);
+  const [win, setWin] = useState(0);
+  const [lose, setLose] = useState(0);
+  const [tie, setTie] = useState(0);
 
   const randomComputerChoice = () =>
     CHOICES[Math.floor(Math.random() * CHOICES.length)];
@@ -45,6 +48,14 @@ export default function App () {
     const newUserChoice = CHOICES.find(choice => choice.name === userChoice);
     const newComputerChoice = CHOICES.find(choice => choice.name === compChoice);
 
+    if (result === 'Victory!') {
+      setWin(win + 1);
+    } else if (result === 'Defeat!') {
+      setLose(lose + 1);
+    } else {
+      setTie(tie + 1)
+    }
+
     setGamePrompt(result);
     setUserChoice(newUserChoice);
     setComChoice(newComputerChoice);
@@ -65,11 +76,20 @@ export default function App () {
         <ChoiceCard player='Computer' choice={comChoice} />
       </View>
       { CHOICES.map(({ name }) => <Button key={name} name={name} onPress={onPress} />) }
-      <TouchableOpacity onPress={() => toggleShowModal(true)}>
-        <Text style={{ marginTop: 15, fontSize: 20 }}>View history</Text>
+
+      <TouchableOpacity onPress={() => {
+          (win + lose + tie > 0) ?toggleShowModal(true) : alert("You haven't played yet!!")
+      }}>
+        <Text style={{ marginTop: 15, fontSize: 20, textDecorationLine: 'underline' }}>View history</Text>
       </TouchableOpacity>
 
-      <History showModal={showModal} toggleShowModal={() => toggleShowModal(false)} />
+      <History 
+        showModal={showModal} 
+        toggleShowModal={() => toggleShowModal(false)} 
+        win={win} 
+        lose={lose} 
+        tie={tie} 
+      />
     </View>
   )
 }
