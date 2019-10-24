@@ -18,7 +18,8 @@ const config = Platform.select({
 
 const CompleteStack = createStackNavigator(
   {
-    Complete: CompleteScreen
+    Complete: CompleteScreen,
+    SingleTodo: SingleTodoScreen
   },
   config
 )
@@ -61,7 +62,8 @@ AllStack.path = ''
 
 const ActiveStack = createStackNavigator(
   {
-    Active: ActiveScreen
+    Active: ActiveScreen,
+    SingleTodo: SingleTodoScreen
   },
   config
 )
@@ -78,11 +80,16 @@ ActiveStack.navigationOptions = {
 
 ActiveStack.path = ''
 
-const tabNavigator = createBottomTabNavigator({
-  CompleteStack,
-  AllStack,
-  ActiveStack
-})
+const tabNavigator = createBottomTabNavigator(
+  {
+    complete: CompleteStack,
+    all: AllStack,
+    active: ActiveStack
+  },
+  {
+    initialRouteName: 'all'
+  }
+)
 
 tabNavigator.path = ''
 

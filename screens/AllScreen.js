@@ -7,79 +7,117 @@ import {
   Text,
   ScrollView
 } from 'react-native'
-import { TODOS } from '../utils/data'
 import TodoItem from '../components/TodoItem'
+import { AsyncStorage } from 'react-native'
+import { withNavigationFocus } from 'react-navigation'
 
-export default function AllScreen (props) {
-  const [todoList, setTodoList] = useState(TODOS)
-  const [todoBody, setTodoBody] = useState('')
+class AllScreen extends React.Component {
+  state = {
+    todoList: [],
+    todoBody: ''
+  }
 
-  const onToggleTodo = id => {
+  onToggleTodo = async id => {
+    const { todoList } = this.state
+
     const todo = todoList.find(todo => todo.id === id)
     todo.status = todo.status === 'Done' ? 'Active' : 'Done'
     const foundIndex = todoList.findIndex(todo => todo.id === id)
     todoList[foundIndex] = todo
     const newTodoList = [...todoList]
-    setTodoList(newTodoList)
 
-    props.navigation.navigate('SingleTodo', {
+    this.setState({ todoList: newTodoList })
+
+    try {
+      await AsyncStorage.setItem('todos', JSON.stringify(newTodoList))
+    } catch (err) {
+      alert(err)
+    }
+
+    this.props.navigation.navigate('SingleTodo', {
       updatedTodo: todo
     })
   }
 
-  const onDeleteTodo = id => {
+  onDeleteTodo = async id => {
+    const { todoList } = this.state
+
     const newTodoList = todoList.filter(todo => todo.id !== id)
-    setTodoList(newTodoList)
+
+    this.setState({ todoList: newTodoList })
+
+    try {
+      await AsyncStorage.setItem('todos', JSON.stringify(newTodoList))
+    } catch (err) {
+      alert(err)
+    }
   }
 
-  const onSubmitTodo = () => {
+  onSubmitTodo = async () => {
+    const { todoBody, todoList } = this.state
+
     const newTodo = {
       body: todoBody,
       status: 'Active',
       id: todoList.length + 1
     }
     const newTodoList = [...todoList, newTodo]
-    setTodoList(newTodoList)
-    setTodoBody('')
+
+    this.setState({ todoList: newTodoList })
+
+    try {
+      await AsyncStorage.setItem('todos', JSON.stringify(newTodoList))
+    } catch (err) {
+      alert(err)
+    }
+
+    this.setState({ todoBody: '' })
   }
 
-  return (
-    <View style={styles.container}>
-      <TextInput
-        value={todoBody}
-        style={styles.todoInput}
-        onChangeText={text => setTodoBody(text)}
-      />
-      <TouchableOpacity style={styles.button} onPress={onSubmitTodo}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-      <ScrollView style={styles.scrollView}>
-        <View style={{ flex: 1 }}>
-          {todoList.map((todo, idx) => {
-            return (
-              <TodoItem
-                idx={idx}
-                todo={todo}
-                key={todo.body}
-                onToggleTodo={onToggleTodo}
-                onDeleteTodo={onDeleteTodo}
-              />
-            )
-          })}
+  render () {
+    const { todoBody, todoList } = this.state
+
+    return (
+      <View style={styles.container}>
+        <View style={{ alignItems: 'center' }}>
+          <TextInput
+            value={todoBody}
+            style={styles.todoInput}
+            onChangeText={text => this.setState({ todoBody: text })}
+          />
+          <TouchableOpacity style={styles.button} onPress={this.onSubmitTodo}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
-  )
+        <ScrollView style={styles.scrollView}>
+          <View style={{ flex: 1 }}>
+            {todoList.map((todo, idx) => {
+              return (
+                <TodoItem
+                  idx={idx}
+                  todo={todo}
+                  key={todo.body}
+                  onToggleTodo={this.onToggleTodo}
+                  onDeleteTodo={this.onDeleteTodo}
+                />
+              )
+            })}
+          </View>
+        </ScrollView>
+      </View>
+    )
+  }
 }
 
 AllScreen.navigationOptions = {
   title: 'All Todos'
 }
 
+export default withNavigationFocus(AllScreen)
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
     backgroundColor: 'white'
   },
@@ -93,7 +131,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderColor: 'grey',
     borderRadius: 8,
-    paddingHorizontal: 15
+    paddingHorizontal: 15,
+    paddingVertical: 10
   },
   button: {
     marginBottom: 20,
